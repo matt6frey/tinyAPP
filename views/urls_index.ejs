@@ -9,7 +9,12 @@
     <h3>Links </h3>
     <ol>
       <% Object.keys(urls).forEach((key) => { %>
-        <li><%= key %> &rarr; <%= urls[key] %> <a href="/urls/<%= key %>" class="btn btn-primary d-inline-block">Edit</a> <form method="POST" action="/urls/<%= key %>/delete" class="d-inline-block"><input type="submit" value="Delete" class="btn btn-primary d-inline-block"></form></li>
+        <li><span class="d-inline-block"><%= key %> &rarr; <%= urls[key] %></span>
+          <form method="POST" action="/urls/<%= key %>/delete" class="delete m-0">
+          <a href="/urls/<%= key %>" class="btn btn-primary d-inline-block">Edit</a>
+          <input type="submit" value="Delete" class="btn btn-primary d-inline-block">
+        </form>
+        </li>
       <% }) %>
     </ol>
 
