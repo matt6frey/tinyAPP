@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <% include partials/_head.ejs %>
+
+  <body>
+  <!-- include header -->
+  <div class="container p-3">
+    <% include partials/_header.ejs %>
+    <h3>Links </h3>
+    <ol>
+      <% Object.keys(urls).forEach((key) => { %>
+        <li><%= key %> &rarr; <%= urls[key] %> <a href="/urls/<%= key %>" class="btn btn-primary d-inline-block">Edit</a> <form method="POST" action="/urls/<%= key %>/delete" class="d-inline-block"><input type="submit" value="Delete" class="btn btn-primary d-inline-block"></form></li>
+      <% }) %>
+    </ol>
+
+    <p><a href="/urls/new" class="btn btn-primary">Add New</a></p>
+  </div>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "name": "http-server",
+  "version": "1.0.0",
+  "description": "Example of setting up a server with Node",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:matt6frey/tinyAPP.git"
+  },
+  "keywords": [
+    "server"
+  ],
+  "author": "M6F",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matt6frey/tinyAPP/issues"
+  },
+  "homepage": "https://github.com/matt6frey/tinyAPP#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "ejs": "^2.6.1",
+    "express": "^4.16.3",
+    "http": "0.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.17.4"
+  }
+}
