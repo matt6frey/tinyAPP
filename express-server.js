@@ -3,6 +3,7 @@ var express = require('express');
 var app = express();
 var PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
+var cookieParser = require('cookie-parser');
 
 function generateRandomString() {
   let short = '';
@@ -24,7 +25,7 @@ function generateRandomString() {
 
 //Parse Form Data
 app.use(bodyParser.urlencoded({extended: true}));
-
+app.use(cookieParser());
 //Enalbe EJS
 app.set('view engine', 'ejs');
 
@@ -47,10 +48,14 @@ app.get("/u/:shortURL", (req, res) => {
 
 //Route for link list
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    username: req.cookies["username"],
+    urls: urlDatabase
+  };
   res.render("urls_index", templateVars);
 });
 
+//Route to shortURL page.
 app.post("/urls", (req, res) => {
   let short = generateRandomString();
   urlDatabase[short] = req.body.longURL;
@@ -59,29 +64,51 @@ app.post("/urls", (req, res) => {
 
 //Route for Form
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  var  templateVars = {
+    username: req.cookies["username"]
+  }
+  res.render("urls_new", templateVars);
 });
 
 //Route for short links
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
+    username: req.cookies["username"],
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
     };
   res.render("urls_show", templateVars);
 });
 
+//Route for deleting entries.
 app.post("/urls/:id/delete", (req, res) => {
   res.statusCode = 200;
   delete urlDatabase[req.params.id];
   res.redirect('/urls/');
 });
 
+//Route for editing URLs
 app.post("/urls/:id/edit", (req, res) => {
   res.statusCode = 200;
   // console.log();
   urlDatabase[req.params.id] = req.body.longURL;
   res.redirect(`/urls/${ req.params.id }/`);
+});
+
+//Route for logging in.
+app.post('/login', (req, res) => {
+  // Set Username value in cookie.
+  res.cookie("username", req.body.username, { expires: new Date(Date.now() + (60*60*24)) });
+  //console.log("Username entered: ", req.body.username);
+  res.redirect("/urls/");
+});
+
+//Route for logging out.
+app.post('/logout', (req, res) => {
+  // Set Username value in cookie.
+  res.clearCookie("username", req.body.username, { expires: -999 });
+  //console.log("Username entered: ", req.body.username);
+  res.redirect("/urls/");
 });
 
 //Route to JSON Data of URLS
