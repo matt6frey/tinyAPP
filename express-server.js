@@ -58,6 +58,7 @@ app.get("/", (req, res) => {
 app.get("/urls/login", (req,res) => {
   res.statusCode = 200;
   let templateVars = {
+    user_id: req.cookies.user_id,
     user: users[req.cookies['user_id']],
     urls: urlDatabase
   };
@@ -69,14 +70,20 @@ app.post('/urls/login', (req, res) => {
   // Set Username value in cookie.
   let email = req.body.email;
   let pass = req.body.password;
-  console.log("USERID  =",req.cookies['user_id']);
+  let match;
   if(email === '' || email === undefined) {
     res.sendStatus(404);
   } else if (pass === '' || pass === undefined) {
     res.sendStatus(404);
   } else {
-    if(users[req.cookies['user_id']].email === email && users[req.cookies['user_id']].password === pass) {
+    Object.keys(users).forEach( (user) => {
+      if(email === users[user].email && pass === users[user].password) {
+        match = true;
+      }
+    });
+    if(match) {
       res.statusCode = 200;
+      res.cookie("user_id", newUserID, { expires: new Date(Date.now() + (60*60*24)) });
       res.redirect("/urls/");
     } else {
       res.sendStatus(403);
@@ -85,10 +92,9 @@ app.post('/urls/login', (req, res) => {
 });
 
 //Route for logging out.
-app.post('/logout', (req, res) => {
+app.get('/logout', (req, res) => {
   // Set Username value in cookie.
-  res.clearCookie("user_id", req.cookies['user_id'], { expires: - 999 });
-  //console.log("Username entered: ", req.body.username);
+  res.clearCookie("user_id");
   res.redirect( "/urls/");
 });
 
@@ -101,6 +107,7 @@ app.get("/u/:shortURL", (req, res) => {
 //Route for link list
 app.get("/urls", (req, res) => {
   let templateVars = {
+    user_id: req.cookies.user_id,
     user: users[req.cookies['user_id']],
     urls: urlDatabase
   };
@@ -117,6 +124,7 @@ app.post("/urls", (req, res) => {
 //Route for New URL Form
 app.get("/urls/new", (req, res) => {
   let  templateVars = {
+    user_id: req.cookies.user_id,
     user: users[req.cookies['user_id']]
   };
   res.render("urls_new", templateVars);
@@ -134,13 +142,12 @@ app.post("/urls/register", (req, res) => {
   newUserID = generateRandomString();
   var userList = Object.keys(users);
   userList.forEach((user) => {
-    console.log(user);
     if (users[user].email === req.body.email) {
-      res.sendStatus(404);
+      res.sendStatus(400);
     }
   });
   if (req.body.email === '' || req.body.email === undefined || req.body.password === '' || req.body.password === undefined) {
-    res.sendStatus(404);
+    res.sendStatus(403);
   } else {
     users[newUserID] = {
       id: newUserID,
@@ -150,6 +157,7 @@ app.post("/urls/register", (req, res) => {
     res.cookie("user_id", newUserID, { expires: new Date(Date.now() + (60*60*24)) });
 
     templateVars = {
+      user_id: req.cookies['user_id'],
       user: users[req.cookies['user_id']],
       urls: urlDatabase
     };
@@ -160,6 +168,7 @@ app.post("/urls/register", (req, res) => {
 //Route for short links
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
+    user_id: req.cookies.user_id,
     user: users[req.cookies['user_id']],
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
@@ -177,7 +186,6 @@ app.post("/urls/:id/delete", (req, res) => {
 //Route for editing URLs
 app.post("/urls/:id/edit", (req, res) => {
   res.statusCode = 200;
-  // console.log();
   urlDatabase[req.params.id] = req.body.longURL;
   res.redirect( `/urls/${ req.params.id }/`);
 });

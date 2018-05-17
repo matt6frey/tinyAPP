@@ -1,4 +1,11 @@
 <header role="banner" class="text-center clearFix">
-  <p class="text-right"><a href="/urls/login" class="btn btn-primary">Login</a> <a href="/urls/register" class="btn btn-primary">Register</a></p>
+  <p class="text-right">
+    <% if(user_id !== undefined) { %>
+      <a href="/logout" class="btn btn-primary">Logout</a>
+    <% } else { %>
+      <a href="/urls/login" class="btn btn-primary">Login</a>
+      <a href="/urls/register" class="btn btn-primary">Register</a>
+    <% } %>
+    </p>
   <h1>TinyAPP</h1>
 </header>
