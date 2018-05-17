@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+  <% include partials/_head.ejs %>
+  <body style="font-size:20px; padding:50px;">
+    <% include partials/_header.ejs %>
+    <h2 class="text-center">Login</h2>
+    <form name="login" method="POST" action="/login" style="margin:50px auto; width: 410px;">
+      <label for="email" style="width: 100px;">E-mail:</label>
+      <input id="email" type="email" name="email" placeholder="joe@example.com" style="width: 300px" class="ml-5"><br>
+      <label for="password" style="width: 100px;">Password:</label>
+      <input id="password" type="password" name="password" placeholder="12345678" style="width: 300px">
+      <input type="submit" value="Submit">
+    </form>
+  </body>
+</html>
