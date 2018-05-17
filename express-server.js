@@ -67,14 +67,27 @@ app.get("/urls/login", (req,res) => {
 //Route for logging in. // Maybe need to fix.
 app.post('/urls/login', (req, res) => {
   // Set Username value in cookie.
-  res.cookie("user_id", req.body.username, { expires: new Date(Date.now() + (60*60*24)) });
-  res.redirect("/urls/");
+  let email = req.body.email;
+  let pass = req.body.password;
+  console.log("USERID  =",req.cookies['user_id']);
+  if(email === '' || email === undefined) {
+    res.sendStatus(404);
+  } else if (pass === '' || pass === undefined) {
+    res.sendStatus(404);
+  } else {
+    if(users[req.cookies['user_id']].email === email && users[req.cookies['user_id']].password === pass) {
+      res.statusCode = 200;
+      res.redirect("/urls/");
+    } else {
+      res.sendStatus(403);
+    }
+  }
 });
 
 //Route for logging out.
 app.post('/logout', (req, res) => {
   // Set Username value in cookie.
-  res.clearCookie("user_id", req.body.username, { expires: - 999 });
+  res.clearCookie("user_id", req.cookies['user_id'], { expires: - 999 });
   //console.log("Username entered: ", req.body.username);
   res.redirect( "/urls/");
 });
