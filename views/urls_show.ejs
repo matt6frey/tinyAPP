@@ -7,11 +7,11 @@
   <div class="container p-3">
     <% include partials/_header.ejs %>
 
-    <div>
-      <h2>
+    <div style="margin:50px auto; width: 410px;">
+      <h2 class="text-center">
         Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a>
       </h2>
-      <form method="POST" action="/urls/<%= shortURL %>/edit" class="d-inline-block">
+      <form method="POST" action="/urls/<%= shortURL %>/edit" class="d-inline-block" >
         <label for="LongURL"> <b>Edit URL:</b>
           <input type="text" name="longURL" id="longURL" value="<%= longURL %>" class="pl-2">
         </label>

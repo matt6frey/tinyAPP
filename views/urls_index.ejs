@@ -6,8 +6,8 @@
   <!-- include header -->
   <div class="container p-3">
     <% include partials/_header.ejs %>
-    <h3>Links </h3>
-    <ol>
+    <h3 class="text-center">Links</h3>
+    <ol style="margin:50px auto; width: 410px;">
       <% Object.keys(urls).forEach((key) => { %>
         <li><span class="d-inline-block"><%= key %> &rarr; <%= urls[key] %></span>
           <form method="POST" action="/urls/<%= key %>/delete" class="delete m-0">
@@ -18,7 +18,7 @@
       <% }) %>
     </ol>
 
-    <p><a href="/urls/new" class="btn btn-primary">Add New</a></p>
+    <p class="text-center"><a href="/urls/new" class="btn btn-primary">Add New</a></p>
   </div>
   </body>
 </html>

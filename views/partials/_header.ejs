@@ -1,18 +1,18 @@
 
-<% if (username === '' || username === undefined) { %>
-<form name="login" method="POST" action="/login">
-  <input type="text" name="username" id="username" placeholder="username">
+<% if (user_id === '' || user_id === undefined) { %>
+<form name="login" method="POST" action="/login" class="text-right">  <!-- style="float: right; width: 270px;" -->
+  <input type="text" name="username" id="username" placeholder="username" style="width: 200px;">
   <input type="submit" value="Login" class="btn">
 </form>
 <% } else { %>
-<form name="login" method="POST" action="/logout">
-  Hi, <span class="username mr-3 font-weight-bold"><%= username %>!</span>
+<form name="login" method="POST" action="/logout" class="text-right"> <!-- style="float: right; width: 270px;" -->
+  Hi, <span class="username mr-3 font-weight-bold"><%= user_id %>!</span>
   <input type="submit" value="Logout" class="btn">
 </form>
 <% } %>
 
 
-<header role="banner">
+<header role="banner" class="text-center clearFix">
   <h1>TinyAPP</h1>
 </header>
 
