@@ -4,6 +4,7 @@ let app = express();
 let PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
 let cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 
 function generateRandomString() {
   let short = '';
@@ -41,58 +42,79 @@ app.set('view engine', 'ejs');
 
 //Mock DB
 var urlDatabase = {
-  "b2xVn2": { url: "http://www.lighthouselabs.ca", userID : 'x7hB4n' },
+  "b2xVn2": { url: "http://www.lighthouselabs.ca", userID: 'x7hB4n' },
   "9sm5xK": { url: "http://www.google.com", userID: '2BBsl2' }
 };
 
+
+//Hash Predefined Users
+var salt = bcrypt.genSaltSync(10); // global salt
+var uPass = [bcrypt.hashSync("mf6Doom", salt), bcrypt.hashSync("businessTime7", salt)];
+//console.log(uPass);
 //User DB
 const users = {
   "x7hB4n": {
     id: "x7hB4n",
     email: "matt6frey@gmail.com",
-    password: "mf6Doom"
+    password: uPass[0]
   },
   "2BBsl2": {
     id: "2BBsl2",
     email: "sukiYoJimbo@gmail.com",
-    password: "businessTime7"
+    password: uPass[1]
   }
 };
+//console.log(bcrypt.compareSync("mf6Doom", users['x7hB4n'].password), bcrypt.compareSync('businessTime7', users['2BBsl2'].password));
 
 //Root
 app.get("/", (req, res) => {
   res.end("Hello!");
 });
 
+app.get('/urls/invalid-email', function (req,res) {
+  res.render('urls_err_email');
+});
+
+app.get('/urls/invalid-pass', function (req,res) {
+  res.render('urls_err_pass');
+});
+
+app.get('/urls/invalid-email-pass', function (req,res) {
+  res.render('urls_err_email_pass');
+});
+
 //Route to login
 app.get("/urls/login", (req,res) => {
   res.statusCode = 200;
   let email = getEmail(users, req.cookies.user_id);
+  //console.log(res.body, res.params);
   let templateVars = {
     user_id: req.cookies.user_id,
     email: email,
     urls: urlDatabase
   };
-  console.log("From login: ",templateVars);
   res.render('urls_login', templateVars);
 });
 
-//Route for logging in. // Maybe need to fix.
+//Route for logging in.
 app.post('/urls/login', (req, res) => {
   // Set Username value in cookie.
-  let email = req.body.email;
   let pass = req.body.password;
-  let match;
-  let loggedID;
+  let email = req.body.email;
+  let match; let loggedID;
   if(email === '' || email === undefined) {
-    res.sendStatus(404);
+    res.statusCode = 403;
+    res.redirect('/urls/invalid-email');
   } else if (pass === '' || pass === undefined) {
-    res.sendStatus(404);
+    res.statusCode = 403;
+    res.redirect('/urls/invalid-pass')
   } else {
     Object.keys(users).forEach( (user) => {
-      if(email === users[user].email && pass === users[user].password) {
-        match = true;
-        loggedID = users[user].id;
+      if(email === users[user].email) {
+        if(bcrypt.compareSync(pass, users[user].password)) {
+          match = true;
+          loggedID = users[user].id;
+        }
       }
     });
     if(match) {
@@ -100,7 +122,8 @@ app.post('/urls/login', (req, res) => {
       res.cookie("user_id", loggedID, { expires: new Date(Date.now() + (60*60*24)) });
       res.redirect("/urls/");
     } else {
-      res.sendStatus(403);
+      res.statusCode = 403;
+      res.redirect('/urls/invalid-email-pass');
     }
   }
 });
@@ -188,10 +211,12 @@ app.post("/urls/register", (req, res) => {
   if (req.body.email === '' || req.body.email === undefined || req.body.password === '' || req.body.password === undefined) {
     res.sendStatus(403);
   } else {
+    var hash = bcrypt.hashSync(req.body.password, salt);
+    console.log("HASH IN REGISTER: ", hash);
     users[newUserID] = {
       id: newUserID,
       email: req.body.email,
-      password: req.body.password
+      password: hash
     };
     res.cookie("user_id", newUserID, { expires: new Date(Date.now() + (60*60*24)) });
     let email = getEmail(users, req.cookies.user_id);;

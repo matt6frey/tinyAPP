@@ -31,8 +31,21 @@ function requestHandler(request, response) {
   }
 }
 
+const bcrypt = require('bcryptjs');
+let password = ["purple-monkey-dinosaur", "purple-monkey-dinosaur", "matt", "cat","rat","man in a purple hat"];
+const hashedPassword = bcrypt.hashSync(password, 10);
+
+for (var i =0; i < password.length; i++) {
+  var p = password[i];
+  var h = bcrypt.hashSync(p,10);
+  console.log(p);
+  console.log("hash " + i + ": ",h);
+}
+
+//console.log(hashedPassword);
+
 var server = http.createServer(requestHandler);
 
-server.listen(PORT, () => {
-  console.log(`Server listening on: http://localhost:${PORT}`);
-});
+//server.listen(PORT, () => {
+//  console.log(`Server listening on: http://localhost:${PORT}`);
+//});
