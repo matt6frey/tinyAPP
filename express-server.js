@@ -23,6 +23,16 @@ function generateRandomString() {
   return short;
 }
 
+function getEmail(users, userID) {
+  var match;
+  Object.keys(users).forEach((user) => {
+    if(users[user].id === userID) {
+      match = users[user].email;
+    }
+  });
+  return match;
+}
+
 //Parse Form Data
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -31,20 +41,20 @@ app.set('view engine', 'ejs');
 
 //Mock DB
 var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { url: "http://www.lighthouselabs.ca", userID : 'x7hB4n' },
+  "9sm5xK": { url: "http://www.google.com", userID: '2BBsl2' }
 };
 
 //User DB
 const users = {
   "x7hB4n": {
-    id: "matt6frey",
+    id: "x7hB4n",
     email: "matt6frey@gmail.com",
     password: "mf6Doom"
   },
   "2BBsl2": {
-    id: "sukiYoJimbo",
-    email: "suki@gmail.com",
+    id: "2BBsl2",
+    email: "sukiYoJimbo@gmail.com",
     password: "businessTime7"
   }
 };
@@ -57,11 +67,13 @@ app.get("/", (req, res) => {
 //Route to login
 app.get("/urls/login", (req,res) => {
   res.statusCode = 200;
+  let email = getEmail(users, req.cookies.user_id);
   let templateVars = {
     user_id: req.cookies.user_id,
-    user: users[req.cookies['user_id']],
+    email: email,
     urls: urlDatabase
   };
+  console.log("From login: ",templateVars);
   res.render('urls_login', templateVars);
 });
 
@@ -71,6 +83,7 @@ app.post('/urls/login', (req, res) => {
   let email = req.body.email;
   let pass = req.body.password;
   let match;
+  let loggedID;
   if(email === '' || email === undefined) {
     res.sendStatus(404);
   } else if (pass === '' || pass === undefined) {
@@ -79,11 +92,12 @@ app.post('/urls/login', (req, res) => {
     Object.keys(users).forEach( (user) => {
       if(email === users[user].email && pass === users[user].password) {
         match = true;
+        loggedID = users[user].id;
       }
     });
     if(match) {
       res.statusCode = 200;
-      res.cookie("user_id", newUserID, { expires: new Date(Date.now() + (60*60*24)) });
+      res.cookie("user_id", loggedID, { expires: new Date(Date.now() + (60*60*24)) });
       res.redirect("/urls/");
     } else {
       res.sendStatus(403);
@@ -100,16 +114,31 @@ app.get('/logout', (req, res) => {
 
 //Route Redirect for Short URLS
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
-  res.redirect( longURL);
+  let longURL = urlDatabase[req.params.shortURL].url;
+  res.redirect( longURL );
 });
 
+function userURLS(urlDB, userID) {
+  var urlList = {};
+  let i = 0;
+  Object.keys(urlDB).forEach( ( url ) => {
+    if (urlDB[url].userID === userID) {
+      urlList[url] = Object.assign( url, {
+        user_id: userID,
+        longURL: urlDB[url].url,
+        shortURL: url
+       });
+    }
+  });
+  return urlList;
+}
 //Route for link list
 app.get("/urls", (req, res) => {
+  let email = getEmail(users, req.cookies.user_id);;
   let templateVars = {
     user_id: req.cookies.user_id,
-    user: users[req.cookies['user_id']],
-    urls: urlDatabase
+    email: email,
+    urls: userURLS(urlDatabase, req.cookies.user_id)
   };
   res.render("urls_index", templateVars);
 });
@@ -117,22 +146,32 @@ app.get("/urls", (req, res) => {
 //Route to shortURL page.
 app.post("/urls", (req, res) => {
   let short = generateRandomString();
-  urlDatabase[short] = req.body.longURL;
+  urlDatabase[short] = { url: req.body.longURL, userID: req.cookies.user_id };
   res.redirect( `/urls/${ short }`);
 });
 
 //Route for New URL Form
 app.get("/urls/new", (req, res) => {
-  let  templateVars = {
-    user_id: req.cookies.user_id,
-    user: users[req.cookies['user_id']]
-  };
-  res.render("urls_new", templateVars);
+  if(req.cookies.user_id !== undefined) {
+    Object.keys(users).forEach( (user) => {
+      if(users[user].id === req.cookies.user_id) {
+        let email = getEmail(users, req.cookies.user_id);;
+        let templateVars = {
+          email: email,
+          user_id: req.cookies.user_id,
+          user: users[req.cookies['user_id']]
+        };
+        res.render("urls_new", templateVars);
+      }
+    });
+  } else {
+    res.redirect("/urls/login");
+  }
 });
 
 //Route for Register Form
 app.get("/urls/register", (req, res) => {
-  let  templateVars = {
+  let templateVars = {
     user: users[req.cookies['user_id']]
   };
   res.render("urls_register", templateVars);
@@ -155,39 +194,46 @@ app.post("/urls/register", (req, res) => {
       password: req.body.password
     };
     res.cookie("user_id", newUserID, { expires: new Date(Date.now() + (60*60*24)) });
-
+    let email = getEmail(users, req.cookies.user_id);;
     templateVars = {
       user_id: req.cookies['user_id'],
-      user: users[req.cookies['user_id']],
+      email: email,
       urls: urlDatabase
     };
-    res.redirect('/urls/');
+    res.redirect('/urls');
   }
 });
 
 //Route for short links
 app.get("/urls/:id", (req, res) => {
+  let email = getEmail(users, req.cookies.user_id);
   let templateVars = {
     user_id: req.cookies.user_id,
-    user: users[req.cookies['user_id']],
+    email: email,
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id]
-    };
+    longURL: urlDatabase[req.params.id].url
+  };
   res.render("urls_show", templateVars);
 });
 
 //Route for deleting entries.
-app.post("/urls/:id/delete", (req, res) => {
-  res.statusCode = 200;
-  delete urlDatabase[req.params.id];
-  res.redirect( '/urls/');
+app.get("/urls/:id/delete", (req, res) => {
+  if(urlDatabase[req.params.id].userID === req.cookies.user_id) {
+    res.statusCode = 200;
+    delete urlDatabase[req.params.id];
+  }
+  res.redirect( '/urls');
 });
 
 //Route for editing URLs
 app.post("/urls/:id/edit", (req, res) => {
-  res.statusCode = 200;
-  urlDatabase[req.params.id] = req.body.longURL;
-  res.redirect( `/urls/${ req.params.id }/`);
+  if(urlDatabase[req.params.id].userID === req.cookies.user_id) {
+    res.statusCode = 200;
+    urlDatabase[req.params.id] = { url: req.body.longURL, userID: req.cookies.user_id };
+    res.redirect( `/urls/${ req.params.id }/`);
+  } else {
+    res.redirect('/urls');
+  }
 });
 
 //Route to JSON Data of URLS
