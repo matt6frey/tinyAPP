@@ -2,7 +2,7 @@
   "name": "http-server",
   "version": "1.0.0",
   "description": "Example of setting up a server with Node",
-  "main": "app.js",
+  "main": "express-server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
