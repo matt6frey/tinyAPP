@@ -2,15 +2,63 @@
 <head>
   <meta charset="UTF-8">
   <title>TinyApp</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <!-- CSS (load bootstrap from a CDN) -->
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
   <style>
+      html {
+        padding: 0;
+        margin: 0;
+      }
       body {
-        padding-top:50px;
+        padding:0 0 50px;
       }
       form.delete {
         width: 160px !important;
+      }
+
+      h1 > span.tiny-title {
+        position: relative !important;
+        left: 6rem !important;
+      }
+      .leaf1 {
+        position: relative;
+        left: 1%;
+        right: -6%;
+        transform: rotate(-35deg);
+        transform-origin: bottom left;
+        animation-name: waver;
+        animation-duration: 5s;
+        animation-iteration-count: infinite;
+      }
+      .leaf2 {
+        position: relative;
+        left: -3%;
+        transform-origin: bottom left;
+        animation-name: waver2;
+        animation-duration: 5s;
+        animation-iteration-count: infinite;
+      }
+
+      @keyframes waver {
+        0% { transform: rotate(-35deg); }
+        50% { transform: rotate(-10deg); }
+        100% { transform: rotate(-35deg); }
+      }
+
+      @keyframes waver2 {
+        0% { transform: rotate(0deg); }
+        50% { transform: rotate(15deg); }
+        100% { transform: rotate(0deg); }
+      }
+
+      .list-group-item {
+        transition: background-color 0.25s ease-in;
+      }
+
+      .list-group-item:hover {
+        background-color: whitesmoke;
       }
   </style>
 </head>

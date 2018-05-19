@@ -7,18 +7,18 @@
   <div class="container p-3">
     <% include partials/_header.ejs %>
 
-    <div style="margin:50px auto; width: 410px;">
-      <h2 class="text-center">
-        Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a>
+    <div style="margin:50px auto; width: 500px;">
+      <h2 class="text-center pt-3 pb-5">
+        Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %> <span class="fas fa-external-link-alt ml-1"></span></a>
       </h2>
-      <form method="POST" action="/urls/<%= shortURL %>" class="d-inline-block" >
-        <label for="LongURL"> <b>Edit URL:</b>
-          <input type="text" name="longURL" id="longURL" value="<%= longURL %>" class="pl-2">
-        </label>
-        <input type="submit" value="Edit" class="btn btn-primary d-inline-block"> <a href="/urls/" class="ml-3 btn btn-success">Home</a>
+      <form method="POST" action="/urls/<%= shortURL %>" class="form-inline">
+        <label for="LongURL" class="form-label d-inline"> <b>Edit URL:</b></label>
+        <input type="text" name="longURL" id="longURL" value="<%= longURL %>" class="form-control d-inline ml-3 pl-2">
+        <input type="submit" value="Edit" class="btn btn-primary d-inline ml-2"> <a href="/urls/" class="ml-2 btn btn-success">Home</a>
       </form>
     </div>
 
   </div>
+  <% include partials/_footer.ejs %>
   </body>
 </html>

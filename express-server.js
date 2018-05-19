@@ -73,7 +73,13 @@ const users = {
 
 //Root
 app.get("/", (req, res) => {
-  res.end("Hello!");
+  if(req.session.user_id !== undefined) {
+    res.statusCode =200;
+    res.redirect('/urls');
+  } else {
+    res.statusCode = 301;
+    res.redirect('/urls/login');
+  }
 });
 
 //Route to login
@@ -277,10 +283,6 @@ app.post("/urls/:id/delete", (req, res) => {
 //Route to JSON Data of URLS
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.end("<html><head><title>Hello</title></head><body><h1>Hello</h1><p>Welcome to this page.</p></body></html>");
 });
 
 app.listen(PORT, () => {

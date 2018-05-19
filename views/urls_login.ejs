@@ -3,15 +3,18 @@
   <% include partials/_head.ejs %>
   <body style="font-size:20px; padding:50px;">
     <header class="text-center">
-        <h1>TinyAPP</h1>
+        <h1><span class="tiny-header d-inline-block">TinyAPP</span> <span class="fas fa-feather leaf1"></span> <span class="fas fa-feather leaf2"></span></h1>
     </header>
     <h2 class="text-center">Login</h2>
-    <form name="login" method="POST" action="/urls/login" style="margin:50px auto; width: 410px;">
-      <label for="email" style="width: 100px;">E-mail:</label>
-      <input id="email" type="email" name="email" placeholder="joe@example.com" style="width: 300px" class="ml-5"><br>
-      <label for="password" style="width: 100px;">Password:</label>
-      <input id="password" type="password" name="password" placeholder="12345678" style="width: 300px">
-      <input type="submit" value="Submit">
+    <form name="login" method="POST" action="/urls/login" class="form-inline" style="margin:50px auto; width: 500px;">
+      <label class="form-label d-inline" for="email" style="width: 100px;">E-mail:</label>
+      <input id="email" type="email" name="email" placeholder="joe@example.com" style="width: 300px" class="form-control d-inline ml-5 mt-2"><br>
+      <label for="password" class="form-label d-inline mt-2" style="width: 100px;">Password:</label>
+      <input id="password" type="password" name="password" placeholder="********" class="form-control d-inline ml-5 mt-2" style="width: 300px">
+      <p class="d-block-inline text-right mt-3" style="width: 450px;">
+        <input type="submit" value="Submit" class="d-block-inline btn btn-success">
+      </p>
     </form>
+    <% include partials/_footer.ejs %>
   </body>
 </html>

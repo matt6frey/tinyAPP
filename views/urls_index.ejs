@@ -6,15 +6,20 @@
   <!-- include header -->
   <div class="container p-3">
     <% include partials/_header.ejs %>
-    <h3 class="text-center">Links</h3>
+    <h3 class="text-center"><span class="fas fa-link"></span> Links</h3>
     <% if (user_id !== undefined) { %>
-    <ol style="margin:50px auto; width: 410px;">
+    <ol class="list-group p-0" style="margin:50px auto; width: 500px;">
       <% Object.keys(urls).forEach( (key) => { %>
-        <li><span class="d-inline-block"><%= urls[key].shortURL %> &rarr; <%= urls[key].longURL %></span>
-          <form method="POST" action="/urls/<%= urls[key].shortURL %>/delete" class="delete m-0">
-          <a href="/urls/<%= urls[key].shortURL %>" class="btn btn-primary d-inline-block">Edit</a>
-          <input type="submit" value="Delete" class="btn btn-primary d-inline-block">
-        </form>
+        <li class="list-group-item">
+          <span class="d-inline-block mb-2">
+            <span class="d-inline float-left" style="width: 290px;"><strong><%= urls[key].shortURL %></strong> &rarr; <%= urls[key].longURL %></span>
+          </span>
+          <span class="d-inline-block">
+            <form method="POST" action="/urls/<%= urls[key].shortURL %>/delete" class="delete d-inline float-right">
+              <input type="submit" value="Delete" class="btn btn-default d-inline-block ml-2 float-right">
+              <a href="/urls/<%= urls[key].shortURL %>" class="btn btn-primary d-inline-block float-right">Edit</a>
+            </form>
+          </span>
         </li>
       <% }) %>
     </ol>
@@ -27,5 +32,6 @@
     <% } %>
 
   </div>
+  <% include partials/_footer.ejs %>
   </body>
 </html>

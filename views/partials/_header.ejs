@@ -1,13 +1,13 @@
-<header role="banner" class="text-center clearFix">
+<header role="banner" class="text-center">
   <p class="text-right">
     <% if(user_id !== undefined) { %>
       <form method="POST" action="/logout" class="text-right">
-        <b style="margin-right: 8px"><%= email %></b> <button href="/logout" class="btn btn-primary">Logout</button>
+        <b class="mr-3"><%= email %></b> <button href="/logout" class="btn btn-primary"><span class="fas fa-sign-out-alt d-inline-block mr-3"></span>Logout</button>
       </form>
     <% } else { %>
-      <a href="/urls/login" class="btn btn-primary">Login</a>
-      <a href="/urls/register" class="btn btn-primary">Register</a>
+      <a href="/urls/login" class="btn btn-primary"><span class="fas fa-sign-in-alt d-inline-block mr-3"></span>  Login</a>
+      <a href="/urls/register" class="btn btn-primary"><span class="fas fa-user-plus d-inline-block mr-3"></span>Register</a>
     <% } %>
     </p>
-  <h1>TinyAPP</h1>
+  <h1><span class="tiny-header d-inline-block">TinyAPP</span> <span class="fas fa-feather leaf1"></span> <span class="fas fa-feather leaf2"></span></h1>
 </header>

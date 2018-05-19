@@ -3,15 +3,18 @@
   <% include partials/_head.ejs %>
   <body style="font-size:20px; padding:50px;">
     <header class="text-center">
-        <h1>TinyAPP</h1>
+        <h1><span class="tiny-header d-inline-block">TinyAPP</span> <span class="fas fa-feather leaf1"></span> <span class="fas fa-feather leaf2"></span></h1>
     </header>
     <h2 class="text-center">Register</h2>
-    <form action="/urls/register" method="POST" style="margin:50px auto; width: 410px;">
+    <form action="/urls/register" method="POST" class="form-inline" style="margin:50px auto; width: 500px;">
       <label for="email" style="width: 100px;">E-mail:</label>
-      <input id="email" type="email" name="email" placeholder="joe@example.com" style="width: 300px" class="ml-5"><br>
+      <input id="email" type="email" name="email" placeholder="joe@example.com" style="width: 300px" class="form-control d-inline ml-5 mt-2"><br>
       <label for="password" style="width: 100px;">Password:</label>
-      <input id="password" type="password" name="password" placeholder="********" style="width: 300px">
-      <input type="submit" value="Submit">
+      <input id="password" type="password" name="password" placeholder="********" style="width: 300px" class="form-control d-inline ml-5 mt-2">
+       <p class="d-block-inline text-right mt-3" style="width: 450px;">
+        <input type="submit" value="Submit" class="d-block-inline btn btn-success">
+      </p>
     </form>
+    <% include partials/_footer.ejs %>
   </body>
 </html>
