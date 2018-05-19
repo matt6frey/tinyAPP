@@ -3,7 +3,7 @@ let express = require('express');
 let app = express();
 let PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
-let cookieParser = require('cookie-parser');
+let cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 
 function generateRandomString() {
@@ -36,7 +36,13 @@ function getEmail(users, userID) {
 
 //Parse Form Data
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+//Set up cookie session.
+app.use(cookieSession({
+  name: 'session',
+  keys: ['secret'],
+  user_id:'',
+  maxAge: 60 * 60 * 24 * 1000 // 24 Hour expiry
+}));
 //Enalbe EJS
 app.set('view engine', 'ejs');
 
@@ -49,8 +55,8 @@ var urlDatabase = {
 
 //Hash Predefined Users
 var salt = bcrypt.genSaltSync(10); // global salt
-var uPass = [bcrypt.hashSync("mf6Doom", salt), bcrypt.hashSync("businessTime7", salt)];
-//console.log(uPass);
+var uPass = [bcrypt.hashSync("lhl", salt), bcrypt.hashSync("lighthouse", salt)];
+
 //User DB
 const users = {
   "x7hB4n": {
@@ -64,7 +70,6 @@ const users = {
     password: uPass[1]
   }
 };
-//console.log(bcrypt.compareSync("mf6Doom", users['x7hB4n'].password), bcrypt.compareSync('businessTime7', users['2BBsl2'].password));
 
 //Root
 app.get("/", (req, res) => {
@@ -72,24 +77,26 @@ app.get("/", (req, res) => {
 });
 
 app.get('/urls/invalid-email', function (req,res) {
+  res.statusCode = 403;
   res.render('urls_err_email');
 });
 
 app.get('/urls/invalid-pass', function (req,res) {
+  res.statusCode = 403;
   res.render('urls_err_pass');
 });
 
 app.get('/urls/invalid-email-pass', function (req,res) {
+  res.statusCode = 403;
   res.render('urls_err_email_pass');
 });
 
 //Route to login
 app.get("/urls/login", (req,res) => {
   res.statusCode = 200;
-  let email = getEmail(users, req.cookies.user_id);
-  //console.log(res.body, res.params);
+  let email = getEmail(users, req.session.user_id);
   let templateVars = {
-    user_id: req.cookies.user_id,
+    user_id: req.session.user_id,
     email: email,
     urls: urlDatabase
   };
@@ -104,10 +111,10 @@ app.post('/urls/login', (req, res) => {
   let match; let loggedID;
   if(email === '' || email === undefined) {
     res.statusCode = 403;
-    res.redirect('/urls/invalid-email');
+    res.send("<html><head><title>Tiny App | 403 - Enter your Email.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;''>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must enter a valid email.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
   } else if (pass === '' || pass === undefined) {
     res.statusCode = 403;
-    res.redirect('/urls/invalid-pass')
+    res.send("<html><head><title>Tiny App | 403 - Enter your Password.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;''>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must enter a valid password to login.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
   } else {
     Object.keys(users).forEach( (user) => {
       if(email === users[user].email) {
@@ -119,26 +126,32 @@ app.post('/urls/login', (req, res) => {
     });
     if(match) {
       res.statusCode = 200;
-      res.cookie("user_id", loggedID, { expires: new Date(Date.now() + (60*60*24)) });
+      req.session.user_id = loggedID;
       res.redirect("/urls/");
     } else {
       res.statusCode = 403;
-      res.redirect('/urls/invalid-email-pass');
+      res.send("<html><head><title>Tiny App | 403 - Complete your Email & Password.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;''>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must enter a valid email and password to login.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
     }
   }
 });
 
+
 //Route for logging out.
-app.get('/logout', (req, res) => {
+app.post('/logout', (req, res) => {
   // Set Username value in cookie.
-  res.clearCookie("user_id");
-  res.redirect( "/urls/");
+  req.session = null;
+  res.redirect( "/urls");
 });
 
 //Route Redirect for Short URLS
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL].url;
-  res.redirect( longURL );
+  if(!Object.keys(urlDatabase).includes(req.params.shortURL)) {
+    res.statusCode = 404;
+    res.send("<html><head><title>Tiny App | 404 - URL Not found.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 404: Not Found</h1><p style='margin-top: 25px;' class='text-center'>The URL you are looking for doesn't exist.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls' class='btn btn-primary'>Login</a></p></body></html>");
+  } else {
+    let longURL = urlDatabase[req.params.shortURL].url;
+    res.redirect( longURL );
+  }
 });
 
 function userURLS(urlDB, userID) {
@@ -157,32 +170,37 @@ function userURLS(urlDB, userID) {
 }
 //Route for link list
 app.get("/urls", (req, res) => {
-  let email = getEmail(users, req.cookies.user_id);;
+  let email = getEmail(users, req.session.user_id);;
   let templateVars = {
-    user_id: req.cookies.user_id,
+    user_id: req.session.user_id,
     email: email,
-    urls: userURLS(urlDatabase, req.cookies.user_id)
+    urls: userURLS(urlDatabase, req.session.user_id)
   };
   res.render("urls_index", templateVars);
 });
 
 //Route to shortURL page.
 app.post("/urls", (req, res) => {
-  let short = generateRandomString();
-  urlDatabase[short] = { url: req.body.longURL, userID: req.cookies.user_id };
-  res.redirect( `/urls/${ short }`);
+  if (req.session.user_id !== undefined) {
+    let short = generateRandomString();
+    urlDatabase[short] = { url: req.body.longURL, userID: req.session.user_id };
+    res.redirect( `/urls/${ short }`);
+  } else {
+    res.statusCode = 403;
+    res.send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must be logged in to submit URLS.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+  }
 });
 
 //Route for New URL Form
 app.get("/urls/new", (req, res) => {
-  if(req.cookies.user_id !== undefined) {
+  if(req.session.user_id !== undefined) {
     Object.keys(users).forEach( (user) => {
-      if(users[user].id === req.cookies.user_id) {
-        let email = getEmail(users, req.cookies.user_id);;
+      if(users[user].id === req.session.user_id) {
+        let email = getEmail(users, req.session.user_id);;
         let templateVars = {
           email: email,
-          user_id: req.cookies.user_id,
-          user: users[req.cookies['user_id']]
+          user_id: req.session.user_id,
+          user: users[req.session.user_id]
         };
         res.render("urls_new", templateVars);
       }
@@ -195,7 +213,7 @@ app.get("/urls/new", (req, res) => {
 //Route for Register Form
 app.get("/urls/register", (req, res) => {
   let templateVars = {
-    user: users[req.cookies['user_id']]
+    user: users[req.session.user_id]
   };
   res.render("urls_register", templateVars);
 });
@@ -212,16 +230,15 @@ app.post("/urls/register", (req, res) => {
     res.sendStatus(403);
   } else {
     var hash = bcrypt.hashSync(req.body.password, salt);
-    console.log("HASH IN REGISTER: ", hash);
     users[newUserID] = {
       id: newUserID,
       email: req.body.email,
       password: hash
     };
-    res.cookie("user_id", newUserID, { expires: new Date(Date.now() + (60*60*24)) });
-    let email = getEmail(users, req.cookies.user_id);;
+    req.session.user_id = newUserID;
+    let email = getEmail(users, req.session.user_id);;
     templateVars = {
-      user_id: req.cookies['user_id'],
+      user_id: req.session.user_id,
       email: email,
       urls: urlDatabase
     };
@@ -231,35 +248,55 @@ app.post("/urls/register", (req, res) => {
 
 //Route for short links
 app.get("/urls/:id", (req, res) => {
-  let email = getEmail(users, req.cookies.user_id);
-  let templateVars = {
-    user_id: req.cookies.user_id,
-    email: email,
-    shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id].url
-  };
-  res.render("urls_show", templateVars);
+  if(!urlDatabase[req.params.id]) {
+    res.statusCode = 404;
+    res.send("<html><head><title>Tiny App | 404 - URL Not found.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 404: Not Found</h1><p style='margin-top: 25px;' class='text-center'>The URL you are looking for doesn't exist.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls' class='btn btn-primary'>Login</a></p></body></html>");
+  } else if(req.session.user_id === undefined) {
+    res.statusCode = 403;
+    res.send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must be logged in to view this page.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+  } else {
+    let email = getEmail(users, req.session.user_id);
+    if(email !== getEmail(users, urlDatabase[req.params.id].userID)) {
+      res.statusCode = 403;
+      res.send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Access Denied</h1><p style='margin-top: 25px;' class='text-center'>You don't have permission to access this page.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+    } else {
+    let templateVars = {
+      user_id: req.session.user_id,
+      email: email,
+      shortURL: req.params.id,
+      longURL: urlDatabase[req.params.id].url
+    };
+    res.render("urls_show", templateVars);
+    }
+  }
+});
+
+app.post("/urls/:id", (req, res) => {
+    if(urlDatabase[req.params.id].userID === req.session.user_id) {
+      res.statusCode = 200;
+      urlDatabase[req.params.id] = { url: req.body.longURL, userID: req.session.user_id };
+      res.redirect( `/urls/${ req.params.id }/`);
+    } else {
+      res.redirect('/urls');
+    }
 });
 
 //Route for deleting entries.
 app.get("/urls/:id/delete", (req, res) => {
-  if(urlDatabase[req.params.id].userID === req.cookies.user_id) {
+  if(req.session.user_id !== undefined && urlDatabase[req.params.id].userID === req.session.user_id) {
     res.statusCode = 200;
     delete urlDatabase[req.params.id];
+  } else if (req.session.user_id === undefined) {
+    res.statusCode = 403;
+    res.send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You need to login to perform this action.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+  } else {
+    res.statusCode = 403;
+    res.send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You don't have permission to delete this page.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
   }
   res.redirect( '/urls');
 });
 
 //Route for editing URLs
-app.post("/urls/:id/edit", (req, res) => {
-  if(urlDatabase[req.params.id].userID === req.cookies.user_id) {
-    res.statusCode = 200;
-    urlDatabase[req.params.id] = { url: req.body.longURL, userID: req.cookies.user_id };
-    res.redirect( `/urls/${ req.params.id }/`);
-  } else {
-    res.redirect('/urls');
-  }
-});
 
 //Route to JSON Data of URLS
 app.get("/urls.json", (req, res) => {

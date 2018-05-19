@@ -1,7 +1,9 @@
 <header role="banner" class="text-center clearFix">
   <p class="text-right">
     <% if(user_id !== undefined) { %>
-      <b style="margin-right: 8px"><%= email %></b> <a href="/logout" class="btn btn-primary">Logout</a>
+      <form method="POST" action="/logout" class="text-right">
+        <b style="margin-right: 8px"><%= email %></b> <button href="/logout" class="btn btn-primary">Logout</button>
+      </form>
     <% } else { %>
       <a href="/urls/login" class="btn btn-primary">Login</a>
       <a href="/urls/register" class="btn btn-primary">Register</a>
