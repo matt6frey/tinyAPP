@@ -3,10 +3,12 @@ This is a fullstack App using Express, EJS and Node. It allows users to shorten 
 
 ## Screenshots
 <img alt="Screenshot of the Log in Page" src="https://github.com/matt6frey/tinyAPP/blob/master/docs/login-tinyApp.png" width="49%" height="auto" align="left">
-<img alt="Screenshot of the main page when logged in." width="46%" height="auto" src="https://github.com/matt6frey/tinyAPP/blob/master/docs/logged-in.png" align="right">
+<img alt="Screenshot of the main page when logged in." width="48%" height="auto" src="https://github.com/matt6frey/tinyAPP/blob/master/docs/logged-in.png" align="right">
 
+<div style="clear:both;"></div>
 
-----------------------
+_______
+
 
 
 ## Dependencies
