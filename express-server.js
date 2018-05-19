@@ -249,22 +249,25 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-    if(urlDatabase[req.params.id].userID === req.session.user_id) {
-      res.statusCode = 200;
-      urlDatabase[req.params.id] = { url: req.body.longURL, userID: req.session.user_id };
-      res.redirect( `/urls/${ req.params.id }/`);
+    if(req.session.user_id !== undefined) {
+      if(urlDatabase[req.params.id].userID === req.session.user_id) {
+        res.statusCode = 200;
+        urlDatabase[req.params.id] = { url: req.body.longURL, userID: req.session.user_id };
+        res.redirect( `/urls/${ req.params.id }/`);
+      }
     } else {
       res.redirect('/urls');
     }
 });
 
 //Route for deleting entries.
-app.get("/urls/:id/delete", (req, res) => {
-  if(req.session.user_id !== undefined && urlDatabase[req.params.id].userID === req.session.user_id) {
+app.post("/urls/:id/delete", (req, res) => {
+
+  if (req.session.user_id === undefined) {
+    res.status(403).send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You need to login to perform this action.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+  } else if(req.session.user_id !== undefined && urlDatabase[req.params.id].userID === req.session.user_id) {
     res.statusCode = 200;
     delete urlDatabase[req.params.id];
-  } else if (req.session.user_id === undefined) {
-    res.status(403).send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You need to login to perform this action.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
   } else {
     res.status(403).send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You don't have permission to delete this page.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
   }
