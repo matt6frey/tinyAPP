@@ -76,21 +76,6 @@ app.get("/", (req, res) => {
   res.end("Hello!");
 });
 
-app.get('/urls/invalid-email', function (req,res) {
-  res.statusCode = 403;
-  res.render('urls_err_email');
-});
-
-app.get('/urls/invalid-pass', function (req,res) {
-  res.statusCode = 403;
-  res.render('urls_err_pass');
-});
-
-app.get('/urls/invalid-email-pass', function (req,res) {
-  res.statusCode = 403;
-  res.render('urls_err_email_pass');
-});
-
 //Route to login
 app.get("/urls/login", (req,res) => {
   res.statusCode = 200;
@@ -110,11 +95,9 @@ app.post('/urls/login', (req, res) => {
   let email = req.body.email;
   let match; let loggedID;
   if(email === '' || email === undefined) {
-    res.statusCode = 403;
-    res.send("<html><head><title>Tiny App | 403 - Enter your Email.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;''>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must enter a valid email.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+    res.status(403).send("<html><head><title>Tiny App | 403 - Enter your Email.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;''>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must enter a valid email.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
   } else if (pass === '' || pass === undefined) {
-    res.statusCode = 403;
-    res.send("<html><head><title>Tiny App | 403 - Enter your Password.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;''>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must enter a valid password to login.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+    res.status(403).send("<html><head><title>Tiny App | 403 - Enter your Password.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;''>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must enter a valid password to login.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
   } else {
     Object.keys(users).forEach( (user) => {
       if(email === users[user].email) {
@@ -129,8 +112,7 @@ app.post('/urls/login', (req, res) => {
       req.session.user_id = loggedID;
       res.redirect("/urls/");
     } else {
-      res.statusCode = 403;
-      res.send("<html><head><title>Tiny App | 403 - Complete your Email & Password.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;''>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must enter a valid email and password to login.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+      res.status(403).send("<html><head><title>Tiny App | 403 - Complete your Email & Password.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;''>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must enter a valid email and password to login.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
     }
   }
 });
@@ -146,8 +128,7 @@ app.post('/logout', (req, res) => {
 //Route Redirect for Short URLS
 app.get("/u/:shortURL", (req, res) => {
   if(!Object.keys(urlDatabase).includes(req.params.shortURL)) {
-    res.statusCode = 404;
-    res.send("<html><head><title>Tiny App | 404 - URL Not found.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 404: Not Found</h1><p style='margin-top: 25px;' class='text-center'>The URL you are looking for doesn't exist.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls' class='btn btn-primary'>Login</a></p></body></html>");
+    res.status(404).send("<html><head><title>Tiny App | 404 - URL Not found.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 404: Not Found</h1><p style='margin-top: 25px;' class='text-center'>The URL you are looking for doesn't exist.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls' class='btn btn-primary'>Login</a></p></body></html>");
   } else {
     let longURL = urlDatabase[req.params.shortURL].url;
     res.redirect( longURL );
@@ -186,8 +167,7 @@ app.post("/urls", (req, res) => {
     urlDatabase[short] = { url: req.body.longURL, userID: req.session.user_id };
     res.redirect( `/urls/${ short }`);
   } else {
-    res.statusCode = 403;
-    res.send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must be logged in to submit URLS.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+    res.status(403).send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must be logged in to submit URLS.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
   }
 });
 
@@ -249,16 +229,13 @@ app.post("/urls/register", (req, res) => {
 //Route for short links
 app.get("/urls/:id", (req, res) => {
   if(!urlDatabase[req.params.id]) {
-    res.statusCode = 404;
-    res.send("<html><head><title>Tiny App | 404 - URL Not found.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 404: Not Found</h1><p style='margin-top: 25px;' class='text-center'>The URL you are looking for doesn't exist.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls' class='btn btn-primary'>Login</a></p></body></html>");
+    res.status(404).send("<html><head><title>Tiny App | 404 - URL Not found.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 404: Not Found</h1><p style='margin-top: 25px;' class='text-center'>The URL you are looking for doesn't exist.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls' class='btn btn-primary'>Login</a></p></body></html>");
   } else if(req.session.user_id === undefined) {
-    res.statusCode = 403;
-    res.send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must be logged in to view this page.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+    res.status(403).send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You must be logged in to view this page.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
   } else {
     let email = getEmail(users, req.session.user_id);
     if(email !== getEmail(users, urlDatabase[req.params.id].userID)) {
-      res.statusCode = 403;
-      res.send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Access Denied</h1><p style='margin-top: 25px;' class='text-center'>You don't have permission to access this page.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+      res.status(403).send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Access Denied</h1><p style='margin-top: 25px;' class='text-center'>You don't have permission to access this page.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
     } else {
     let templateVars = {
       user_id: req.session.user_id,
@@ -287,28 +264,21 @@ app.get("/urls/:id/delete", (req, res) => {
     res.statusCode = 200;
     delete urlDatabase[req.params.id];
   } else if (req.session.user_id === undefined) {
-    res.statusCode = 403;
-    res.send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You need to login to perform this action.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+    res.status(403).send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You need to login to perform this action.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
   } else {
-    res.statusCode = 403;
-    res.send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You don't have permission to delete this page.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
+    res.status(403).send("<html><head><title>Tiny App | 403 - Forbidden.</title><link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'></head><body><h1 class='text-center' style='margin-top: 100px;'>Error 403: Forbidden</h1><p style='margin-top: 25px;' class='text-center'>You don't have permission to delete this page.</p><p style='margin-top: 26px;' class='text-center'><a href='/urls/login' class='btn btn-primary'>Login</a></p></body></html>");
   }
   res.redirect( '/urls');
 });
-
-//Route for editing URLs
 
 //Route to JSON Data of URLS
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-
 app.get("/hello", (req, res) => {
   res.end("<html><head><title>Hello</title></head><body><h1>Hello</h1><p>Welcome to this page.</p></body></html>");
 });
-
-// //});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
