@@ -4,6 +4,7 @@
   "description": "Example of setting up a server with Node",
   "main": "express-server.js",
   "scripts": {
+    "start": "nodemon main",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
